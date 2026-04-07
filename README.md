@@ -44,7 +44,7 @@ Menu add-on IDs and math live in `lib/menu-add-ons.ts` (guest take-rate × price
 1. Push this repo to GitHub/GitLab (or connect the repo DO gives you).
 2. Create an **App** → choose the repo, root directory `mss-quote-app`.
 3. **Build command:** `npm ci && npm run build`
-4. **Run command:** `npm start` (runs the standalone server with `HOSTNAME=0.0.0.0` so Docker/Traefik can reach the app; without this, Traefik often shows “no available server”.)
+4. **Run command:** `npm start` (runs `scripts/start-standalone.mjs`, which clears Docker’s `HOSTNAME` so the app listens on `0.0.0.0` and the load balancer can reach it).
 5. Set **HTTP port** / `PORT` to what the platform injects (App Platform sets `PORT` automatically; Next.js respects it).
 6. Enable **HTTPS** on the default `ondigitalocean.app` host or attach your domain.
 
@@ -91,3 +91,20 @@ Menu add-on IDs and math live in `lib/menu-add-ons.ts` (guest take-rate × price
 - This MVP has **no login**; use an obscure subdomain and/or put **HTTP basic auth** in front (nginx/Caddy) or **Cloudflare Access** so strangers can’t use the tool.
 
 **Note:** `next.config.ts` uses `output: "standalone"` for efficient container builds; `Dockerfile` is optional if you use App Platform with Node buildpacks only.
+
+## Coolify (self-hosted)
+
+1. **New application** → deploy **public Git** repo `neonwhistle/mss-quote-app`, branch **`main`**.
+2. **Build pack:** **Nixpacks** (uses `nixpacks.toml` + `npm run build` / `npm run start`) **or** switch to **Dockerfile** and use the repo root `Dockerfile` if you prefer one image definition.
+3. **Is it a static site?** **No** (unchecked) — this is a Next.js server with `/api/quote`.
+4. **Ports:** expose **3000** (Coolify’s Traefik will forward to this port).
+5. **Domains (required for your real URL):** Enter the hostname people will open, e.g. **`https://tmss.neonwhistle.com`**.  
+   Traefik’s `Host(...)` rule is generated from this field. If you only keep the default **`*.sslip.io`** URL, **`https://tmss.neonwhistle.com` will not route** to this container and you’ll see **“no available server.”**  
+   You can use **comma-separated** domains: `https://tmss.neonwhistle.com,http://your-id.ip.sslip.io`
+6. **Save**, then **Redeploy**.
+
+**Why `scripts/start-standalone.mjs`:** Docker sets `HOSTNAME` to the container ID. Next’s standalone server binds to that unless `HOSTNAME` is unset; then it defaults to **`0.0.0.0`**, which Traefik needs.
+
+**Cloudflare:** Point DNS to your server; SSL mode **Full** or **Full (strict)**.
+
+**Labels:** For a Node app, avoid extra **Caddy `try_files` / `index.html`** style rules meant for SPAs — proxy to port **3000** only.

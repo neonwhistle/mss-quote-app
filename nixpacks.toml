@@ -1,0 +1,6 @@
+# Coolify / Railway / Nixpacks: pin the start command so production always uses
+# package.json "start" → scripts/start-standalone.mjs (fixes Docker HOSTNAME vs Traefik).
+# Docs: https://nixpacks.com/docs/configuration/file
+
+[start]
+cmd = "npm run start"
