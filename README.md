@@ -1,5 +1,7 @@
 # MSS Quote App
 
+**Repo:** [github.com/neonwhistle/mss-quote-app](https://github.com/neonwhistle/mss-quote-app)
+
 Local web app for **The Mobile Scoop Shop** event intake and customer quote drafts. Pair with the master **`•• MSS 2026.xltx`** workbook for final numbers until the formulas are fully mirrored here.
 
 ## Requirements
