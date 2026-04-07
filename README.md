@@ -95,7 +95,7 @@ Menu add-on IDs and math live in `lib/menu-add-ons.ts` (guest take-rate × price
 ## Coolify (self-hosted)
 
 1. **New application** → deploy **public Git** repo `neonwhistle/mss-quote-app`, branch **`main`**.
-2. **Build pack:** **Nixpacks** (uses `nixpacks.toml` + `npm run build` / `npm run start`) **or** switch to **Dockerfile** and use the repo root `Dockerfile` if you prefer one image definition.
+2. **Build pack:** **Nixpacks** (`nixpacks.toml` runs `npm run build`, then copies `.next/static` and `public` into `.next/standalone/` so `/_next/static/*` is not 404) **or** use the repo **Dockerfile**, which applies the same layout.
 3. **Is it a static site?** **No** (unchecked) — this is a Next.js server with `/api/quote`.
 4. **Ports:** expose **3000** (Coolify’s Traefik will forward to this port).
 5. **Domains (required for your real URL):** Enter the hostname people will open, e.g. **`https://tmss.neonwhistle.com`**.  

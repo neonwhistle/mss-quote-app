@@ -1,6 +1,17 @@
 # Coolify / Railway / Nixpacks: pin the start command so production always uses
 # package.json "start" → scripts/start-standalone.mjs (fixes Docker HOSTNAME vs Traefik).
+# After `next build`, copy static assets into `.next/standalone/` — the standalone
+# `server.js` does `chdir(__dirname)` to that folder, so without this step `/_next/static/*`
+# (and `public/`) 404. The repo Dockerfile does the same copies for the image layout.
 # Docs: https://nixpacks.com/docs/configuration/file
+
+[phases.build]
+dependsOn = ["install"]
+cmds = [
+  "npm run build",
+  "cp -r .next/static .next/standalone/.next/static",
+  "cp -r public .next/standalone/public",
+]
 
 [start]
 cmd = "npm run start"
