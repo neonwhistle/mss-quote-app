@@ -28,5 +28,5 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 USER nextjs
 EXPOSE 3000
 ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
-CMD ["node", "server.js"]
+# Docker sets HOSTNAME to the container id; Next standalone binds to that unless unset.
+CMD ["/bin/sh", "-c", "unset HOSTNAME && exec node server.js"]
