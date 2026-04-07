@@ -111,6 +111,8 @@ Menu add-on IDs and math live in `lib/menu-add-ons.ts` (guest take-rate × price
    You can use **comma-separated** domains: `https://tmss.neonwhistle.com,http://your-id.ip.sslip.io`
 6. **Save**, then **Redeploy**.
 
+**Docker Compose on Coolify:** Coolify stores compose under `/data/coolify/services/...` without cloning the repo next to it, so `build: .` has no `Dockerfile`. Either deploy as **Git + Dockerfile** / **Nixpacks** (recommended), or use this repo’s `docker-compose.yml` and add an environment variable **`BUILD_CONTEXT=https://github.com/neonwhistle/mss-quote-app.git#main`** so the image builds from Git (BuildKit). For a private repo, point `BUILD_CONTEXT` at a URL or path your build can access.
+
 **Why `scripts/start-standalone.mjs`:** Docker sets `HOSTNAME` to the container ID. Next’s standalone server binds to that unless `HOSTNAME` is unset; then it defaults to **`0.0.0.0`**, which Traefik needs.
 
 **Cloudflare:** Point DNS to your server; SSL mode **Full** or **Full (strict)**.
