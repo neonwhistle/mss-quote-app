@@ -44,7 +44,7 @@ Menu add-on IDs and math live in `lib/menu-add-ons.ts` (guest take-rate × price
 1. Push this repo to GitHub/GitLab (or connect the repo DO gives you).
 2. Create an **App** → choose the repo, root directory `mss-quote-app`.
 3. **Build command:** `npm ci && npm run build`
-4. **Run command:** `npm start`
+4. **Run command:** `npm start` (runs `node .next/standalone/server.js` — required with `output: "standalone"`)
 5. Set **HTTP port** / `PORT` to what the platform injects (App Platform sets `PORT` automatically; Next.js respects it).
 6. Enable **HTTPS** on the default `ondigitalocean.app` host or attach your domain.
 
