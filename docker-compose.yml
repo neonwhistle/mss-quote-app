@@ -10,7 +10,7 @@
 services:
   web:
     build: .
-    image: mss-quote-app:local
+    # Omit `image:` so `docker compose pull` / Coolify does not try to pull from Docker Hub.
     ports:
       - "3000:3000"
     environment:
