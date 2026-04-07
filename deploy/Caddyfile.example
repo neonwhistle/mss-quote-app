@@ -1,0 +1,20 @@
+# Example Caddy config for a DigitalOcean droplet + Docker app on 127.0.0.1:3000
+#
+# 1. Point DNS: A record for your hostname -> droplet public IPv4 (and AAAA if you use IPv6)
+# 2. sudo cp Caddyfile.example /etc/caddy/Caddyfile  (edit hostname first)
+# 3. sudo caddy validate --config /etc/caddy/Caddyfile
+# 4. sudo systemctl reload caddy
+#
+# Caddy will obtain and renew Let's Encrypt certificates automatically.
+
+quote.yourdomain.com {
+	reverse_proxy 127.0.0.1:3000
+}
+
+# Optional: simple password gate (generate hash: caddy hash-password)
+# quote.yourdomain.com {
+# 	basicauth /* {
+# 		mom JDJhJDE0JEJY...
+# 	}
+# 	reverse_proxy 127.0.0.1:3000
+# }

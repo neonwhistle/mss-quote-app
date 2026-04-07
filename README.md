@@ -48,11 +48,42 @@ Menu add-on IDs and math live in `lib/menu-add-ons.ts` (guest take-rate × price
 5. Set **HTTP port** / `PORT` to what the platform injects (App Platform sets `PORT` automatically; Next.js respects it).
 6. Enable **HTTPS** on the default `ondigitalocean.app` host or attach your domain.
 
-**Alternative — Droplet + Docker**
+**Droplet + Docker + Caddy (HTTPS)**
 
-- Install Docker on a small Ubuntu droplet.
-- From `mss-quote-app`: `docker build -t mss-quote .` then `docker run -d -p 3000:3000 --restart unless-stopped mss-quote`
-- Put **Caddy** or **nginx** in front with Let’s Encrypt (TLS) and reverse-proxy to `127.0.0.1:3000`.
+1. **DNS:** Create an **A record** (e.g. `quote.yourdomain.com`) pointing to your droplet’s **public IPv4**. Wait for it to resolve before starting Caddy (Let’s Encrypt needs this).
+
+2. **Firewall** (on the droplet, and in the DigitalOcean **cloud firewall** if you use one): allow **22** (SSH), **80** (HTTP challenge), **443** (HTTPS). Example with `ufw`:
+   ```bash
+   ufw allow OpenSSH && ufw allow 80/tcp && ufw allow 443/tcp && ufw enable
+   ```
+
+3. **App container** (should listen only on localhost — you already use `-p 127.0.0.1:3000:3000`):
+   ```bash
+   docker run -d --name mss-quote --restart unless-stopped -p 127.0.0.1:3000:3000 mss-quote
+   ```
+
+4. **Install Caddy** on Ubuntu (official repo — see [caddyserver.com/docs/install](https://caddyserver.com/docs/install)):
+   ```bash
+   sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https curl
+   curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+   curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
+   sudo apt update && sudo apt install caddy
+   ```
+
+5. **Caddyfile:** Copy `deploy/Caddyfile.example` to `/etc/caddy/Caddyfile` and replace `quote.yourdomain.com` with your real hostname (one place at the top of the site block).
+
+6. **Validate and apply:**
+   ```bash
+   sudo caddy validate --config /etc/caddy/Caddyfile
+   sudo systemctl enable --now caddy
+   sudo systemctl reload caddy
+   ```
+
+7. Open **https://quote.yourdomain.com** — Caddy will obtain a certificate automatically on first request.
+
+**Optional — nginx instead of Caddy:** Use `nginx` + `certbot --nginx` on Ubuntu; `proxy_pass http://127.0.0.1:3000;` in your `server` block. More steps than Caddy for TLS; same idea behind the scenes.
+
+**Repo file:** See `deploy/Caddyfile.example` for the site block (and commented **basic auth** if you want a shared password for family-only use).
 
 **Mom’s workflow**
 
