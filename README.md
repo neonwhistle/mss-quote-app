@@ -57,7 +57,15 @@ Menu add-on IDs and math live in `lib/menu-add-ons.ts` (guest take-rate × price
    ufw allow OpenSSH && ufw allow 80/tcp && ufw allow 443/tcp && ufw enable
    ```
 
-3. **App container** (should listen only on localhost — you already use `-p 127.0.0.1:3000:3000`):
+3. **App container** (should listen only on localhost when Caddy terminates TLS — use `127.0.0.1:3000:3000`):
+
+   **Option A — `docker compose`** (from the repo root, after `git clone`):
+   ```bash
+   docker compose up -d --build
+   ```
+   For Caddy on the same host, set `ports: ["127.0.0.1:3000:3000"]` in `docker-compose.yml` instead of `3000:3000`.
+
+   **Option B — `docker run`** (after `docker build -t mss-quote .`):
    ```bash
    docker run -d --name mss-quote --restart unless-stopped -p 127.0.0.1:3000:3000 mss-quote
    ```

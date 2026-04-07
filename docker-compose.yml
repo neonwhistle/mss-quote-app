@@ -1,0 +1,19 @@
+# Run the same image as production Dockerfile (standalone Next.js on port 3000).
+#
+# Local / droplet:
+#   docker compose up -d --build
+#   open http://localhost:3000
+#
+# Behind Coolify or another reverse proxy, you can publish only on the host loopback:
+#   ports: ["127.0.0.1:3000:3000"]
+
+services:
+  web:
+    build: .
+    image: mss-quote-app:local
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+    restart: unless-stopped
