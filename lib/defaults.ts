@@ -8,10 +8,14 @@ export function getDefaultEventInput(): EventQuoteInput {
   return {
     clientName: "",
     eventDate: "",
+    serviceDate: "",
+    serviceStartTime: "14:00",
+    serviceEndTime: "18:00",
+    serviceTimeZone: "America/Los_Angeles",
     venueNotes: "",
     guestCount: 120,
     zone: "1",
-    vehicle: "van",
+    vehicle: "sweetTooth",
     staffingModel: "single",
     equipmentFee: 425,
     pricePerGuest: 4.25,
@@ -21,6 +25,7 @@ export function getDefaultEventInput(): EventQuoteInput {
     travelFee: 0,
     gratuityPercent: 10,
     selectedMenuAddOnIds: [],
+    menuAddOnOverrides: {},
     addOnFlatTotal: 0,
   };
 }
@@ -56,12 +61,26 @@ const MIN_FEE_HINTS: Record<
   VehicleType,
   { at50: number; at100: number }
 > = {
-  van: { at50: 995, at100: 995 },
+  sweetTooth: { at50: 995, at100: 995 },
+  que: { at50: 995, at100: 995 },
   cart: { at50: 1195, at100: 1195 },
 };
 
+/** Fixed equipment / service base when “Apply zone preset” is used with the Que van (all zones). */
+const QUE_PRESET_BASE_USD = 595;
+
+const SERVICE_TYPE_LABELS: Record<VehicleType, string> = {
+  cart: "Cart",
+  que: "Que",
+  sweetTooth: "Sweet Tooth",
+};
+
+export function getServiceTypeLabel(vehicle: VehicleType): string {
+  return SERVICE_TYPE_LABELS[vehicle];
+}
+
 /**
- * Populate equipment / per-guest fields from zone + vehicle presets.
+ * Populate equipment / per-guest fields from zone + service-type presets.
  * Base-rate columns from the sheet are exposed as a suggested **equipment** offset
  * (many operators fold base into equip fee vs minimum); adjust in settings later.
  */
@@ -70,7 +89,10 @@ export function applyZonePreset(
 ): EventQuoteInput {
   const staffing: StaffingModel = input.staffingModel;
   const pickBase = (): number => {
-    if (input.vehicle === "van") {
+    if (input.vehicle === "que") {
+      return QUE_PRESET_BASE_USD;
+    }
+    if (input.vehicle === "sweetTooth") {
       const row = VAN_BASE_BY_ZONE[input.zone];
       return staffing === "double" ? row.double : row.single;
     }

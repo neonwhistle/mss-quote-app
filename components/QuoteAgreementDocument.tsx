@@ -3,6 +3,7 @@ import {
   getAgreementIntro,
   getAgreementSections,
 } from "@/lib/agreement-terms";
+import { getServiceTypeLabel } from "@/lib/defaults";
 import type { EventQuoteInput, QuoteLineItem, QuoteResult } from "@/lib/types";
 import type { ReactElement } from "react";
 
@@ -26,6 +27,21 @@ function usd2(n: number): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(n);
+}
+
+function formatWallTimeHm(hm: string): string {
+  const t: string = hm.trim();
+  const m: RegExpMatchArray | null = t.match(/^(\d{1,2}):(\d{2})$/);
+  if (m === null) {
+    return hm;
+  }
+  const h: number = Number.parseInt(m[1], 10);
+  const min: number = Number.parseInt(m[2], 10);
+  const d: Date = new Date(2000, 0, 1, h, min);
+  return d.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 function qtyLabel(li: QuoteLineItem): string {
@@ -81,6 +97,16 @@ export function QuoteAgreementDocument({
               <th scope="row">Event date</th>
               <td>{input.eventDate || "—"}</td>
             </tr>
+            {input.serviceDate.trim() !== "" ? (
+              <tr>
+                <th scope="row">Service window</th>
+                <td>
+                  {formatWallTimeHm(input.serviceStartTime)} –{" "}
+                  {formatWallTimeHm(input.serviceEndTime)} ·{" "}
+                  {input.serviceTimeZone}
+                </td>
+              </tr>
+            ) : null}
             <tr>
               <th scope="row">Guest count (est.)</th>
               <td>{input.guestCount}</td>
@@ -88,7 +114,7 @@ export function QuoteAgreementDocument({
             <tr>
               <th scope="row">Service</th>
               <td>
-                {input.vehicle === "van" ? "Van" : "Cart"} · Zone {input.zone}{" "}
+                {getServiceTypeLabel(input.vehicle)} · Zone {input.zone}{" "}
                 · {input.staffingModel === "single" ? "Single" : "Double"}-staff
                 column
               </td>

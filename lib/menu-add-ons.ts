@@ -5,6 +5,8 @@
  * Tune `guestShare` and `pricePerServing` against `Menu cost 26` / your retail columns.
  */
 
+import type { MenuAddOnOverride } from "./types";
+
 export interface MenuAddOnDefinition {
   id: string;
   label: string;
@@ -99,6 +101,66 @@ export function getMenuAddOnById(id: string): MenuAddOnDefinition | undefined {
 
 export function isKnownMenuAddOnId(id: string): boolean {
   return BY_ID.has(id);
+}
+
+const GUEST_SHARE_MIN = 0;
+const GUEST_SHARE_MAX = 2;
+
+/**
+ * Merge catalog defaults with optional per-quote overrides (UI / API).
+ */
+export function applyMenuAddOnOverrides(
+  base: MenuAddOnDefinition,
+  override: MenuAddOnOverride | undefined,
+): MenuAddOnDefinition {
+  if (!override) {
+    return base;
+  }
+  let guestShare: number = base.guestShare;
+  if (
+    typeof override.guestShare === "number" &&
+    Number.isFinite(override.guestShare)
+  ) {
+    guestShare = Math.min(
+      GUEST_SHARE_MAX,
+      Math.max(GUEST_SHARE_MIN, override.guestShare),
+    );
+  }
+  let pricePerServing: number = base.pricePerServing;
+  if (
+    typeof override.pricePerServing === "number" &&
+    Number.isFinite(override.pricePerServing)
+  ) {
+    pricePerServing = Math.max(0, override.pricePerServing);
+  }
+  let takeRateNote: string = base.takeRateNote;
+  if (
+    typeof override.lineNote === "string" &&
+    override.lineNote.trim() !== ""
+  ) {
+    takeRateNote = override.lineNote.trim();
+  }
+  return {
+    ...base,
+    guestShare,
+    pricePerServing,
+    takeRateNote,
+  };
+}
+
+export function menuAddOnOverrideDiffersFromCatalog(
+  base: MenuAddOnDefinition,
+  override: MenuAddOnOverride | undefined,
+): boolean {
+  if (!override) {
+    return false;
+  }
+  const merged: MenuAddOnDefinition = applyMenuAddOnOverrides(base, override);
+  return (
+    merged.guestShare !== base.guestShare ||
+    merged.pricePerServing !== base.pricePerServing ||
+    merged.takeRateNote !== base.takeRateNote
+  );
 }
 
 export interface AddOnLineMath {

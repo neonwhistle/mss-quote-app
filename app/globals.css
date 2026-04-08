@@ -208,6 +208,52 @@ pre.email-out {
   margin-bottom: 0.75rem;
 }
 
+.addon-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.addon-customize {
+  margin: -0.25rem 0 0.35rem 1.85rem;
+  padding: 0.65rem 0.75rem 0.75rem;
+  border-left: 2px solid var(--accent-soft);
+  background: var(--surface);
+  border-radius: 0 8px 8px 8px;
+  border: 1px solid var(--border);
+  border-left-width: 3px;
+  border-left-color: var(--accent);
+}
+
+.addon-customize .field {
+  margin-bottom: 0.5rem;
+}
+
+.addon-customize .field:last-child {
+  margin-bottom: 0;
+}
+
+.addon-customize input[type="text"],
+.addon-customize input[type="number"] {
+  font-size: 0.88rem;
+}
+
+.addon-reset {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  margin-top: 0.35rem;
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: underline;
+  width: fit-content;
+}
+
+.addon-reset:hover {
+  color: var(--text);
+}
+
 .addon-row {
   display: grid;
   grid-template-columns: auto 1fr;

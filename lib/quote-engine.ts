@@ -1,5 +1,6 @@
-import { getMinimumFeeHint } from "./defaults";
+import { getMinimumFeeHint, getServiceTypeLabel } from "./defaults";
 import {
+  applyMenuAddOnOverrides,
   computeMenuAddOnLine,
   getMenuAddOnById,
 } from "./menu-add-ons";
@@ -74,10 +75,14 @@ export function buildQuote(input: EventQuoteInput): QuoteResult {
       continue;
     }
     seenIds.add(rawId);
-    const def = getMenuAddOnById(rawId);
-    if (!def) {
+    const defBase = getMenuAddOnById(rawId);
+    if (!defBase) {
       continue;
     }
+    const def = applyMenuAddOnOverrides(
+      defBase,
+      input.menuAddOnOverrides[rawId],
+    );
     const math = computeMenuAddOnLine(def, input.guestCount);
     if (math.lineTotal <= 0) {
       continue;
@@ -119,7 +124,8 @@ export function buildQuote(input: EventQuoteInput): QuoteResult {
   );
   let minimumFeeWarning: string | undefined;
   if (grandTotal < minimumHint) {
-    minimumFeeWarning = `Quoted total is below the usual ${input.vehicle} minimum (~${minimumHint}) for this guest band — confirm against the Excel “Minimum Service Fees” block.`;
+    const svcLabel: string = getServiceTypeLabel(input.vehicle);
+    minimumFeeWarning = `Quoted total is below the usual ${svcLabel} minimum (~${minimumHint}) for this guest band — confirm against the Excel “Minimum Service Fees” block.`;
   }
 
   return {
@@ -129,7 +135,7 @@ export function buildQuote(input: EventQuoteInput): QuoteResult {
     grandTotal,
     internal: {
       minimumFeeWarning,
-      suggestedFromZone: `Zone ${input.zone} · ${input.vehicle} · ${input.staffingModel} staff`,
+      suggestedFromZone: `Zone ${input.zone} · ${getServiceTypeLabel(input.vehicle)} · ${input.staffingModel} staff`,
     },
   };
 }
@@ -138,11 +144,16 @@ export function quoteToEmailText(
   input: EventQuoteInput,
   result: QuoteResult,
 ): string {
+  const scheduleLine: string =
+    input.serviceDate.trim() !== ""
+      ? `Service window: ${input.serviceStartTime}–${input.serviceEndTime} (${input.serviceTimeZone})`
+      : "";
   const lines: string[] = [
     "The Mobile Scoop Shop — quote draft",
     "",
     `Client: ${input.clientName || "TBD"}`,
     `Event date: ${input.eventDate || "TBD"}`,
+    scheduleLine,
     input.venueNotes ? `Notes: ${input.venueNotes}` : "",
     "",
     "Line items:",
